@@ -1,0 +1,20 @@
+{
+    "name": "yeoldebasil/biscuit",
+    "description": "Fast pace web-app development library for PHP",
+    "type": "library",
+    "license": "MIT",
+    "version": "0.1-dev",
+    "autoload": {
+        "files": ["procedural.php"],
+        "psr-4": {
+            "Yeoldebasil\\Biscuit\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Vasiliy Okunev",
+            "email": "vokunev078@gmail.com"
+        }
+    ],
+    "require": {}
+}
