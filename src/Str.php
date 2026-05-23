@@ -16,7 +16,7 @@ class Str implements Stringable, Iterator, Countable
 			mb_str_split((string) $contents)
 		);
 
-		$this->length = mb_strlen($this->contents);
+		$this->length = mb_strlen($contents);
 	}
 
 	// necessary for countable
@@ -59,28 +59,32 @@ class Str implements Stringable, Iterator, Countable
 	function upper() 
     {
 		return new $this(
-			mb_strtoupper($this->data)
+			mb_strtoupper($this->buffer->glue())
 		);
 	}
 
 	function lower() 
     {
 		return new $this(
-			mb_strtolower($this->data)
+			mb_strtolower($this->buffer->glue())
 		);
 	}
 
 	function ucfirst() 
     {
 		return new $this(
-			ucfirst($this->data)
+			ucfirst($this->buffer->glue())
 		);
+	}
+
+	function cut(int $offset, ?int $length = null) {
+		return new Str(substr($this->buffer->glue(), $offset, $length));
 	}
 
 	function explode(str $separator) 
     {
 		return new arr(
-			explode($separator, $this->data)
+			explode($separator, $this->buffer->glue())
 		);
 	}
 
@@ -119,7 +123,7 @@ class Str implements Stringable, Iterator, Countable
 	function base64() 
     {
 		return new $this(
-			base64_encode($this->contents);
+			base64_encode($this->contents)
 		);
 	}
 

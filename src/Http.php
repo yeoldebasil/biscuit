@@ -14,7 +14,7 @@ class Http
     public object $input;
 
     // Singleton
-    private ?Http $i = null;
+    private static ?Http $i = null;
 
     function __construct()
     {
@@ -119,12 +119,12 @@ class Http
             }
         }
 
-        return lowercase($method);
+        return str($method)->lower()->__toString();
     }
 
     private function parse_useragent(): string
     {
-        return cut($_SERVER['HTTP_USER_AGENT'], 0, 255);
+        return str($_SERVER['HTTP_USER_AGENT'])->cut(0, 255)->__toString();
     }
 
     private function parse_input(): object

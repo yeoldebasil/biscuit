@@ -10,7 +10,7 @@ class Arr implements Iterator, Countable
 	protected int 	$position = 0;
 
 	function __construct(array $data) {
-		if (!array_is_list($contents))
+		if (!array_is_list($data))
 			throw new ValueError("Map array is not yet supported", 1);
 			
 		$this->data = $data;
@@ -99,7 +99,7 @@ class Arr implements Iterator, Countable
 	function json(): Str 
     {
 		return new Str(
-			json_encode($this->data);
+			json_encode($this->data)
 		);
 	}
 }

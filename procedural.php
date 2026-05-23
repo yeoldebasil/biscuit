@@ -1,6 +1,6 @@
 <?php
 
-use Yeoldebasil\Biscuit\Http, Str, Arr;
+use Yeoldebasil\Biscuit\{Http, Str, Arr};
 
 function http(): Http 
 {
