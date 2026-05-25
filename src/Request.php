@@ -1,8 +1,15 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Yeoldebasil\Biscuit;
 
-class Http
+use RuntimeException;
+
+/**
+ * Входящий HTTP-запрос
+ */
+class Request
 {
     public string $ip;
     public string $protocol;
@@ -13,34 +20,22 @@ class Http
     public array  $files;
     public object $input;
 
-    // Singleton
-    private static ?Http $i = null;
-
     function __construct()
     {
-        if (!function_exists('getallheaders')) {
-            throw new \RuntimeException("Please use an Apache2 web-server");
-        }
+        if (!function_exists('getallheaders'))
+            throw new RuntimeException("Please use an Apache2 web-server");
 
-        $this->ip        = $this->parse_ip();
-        $this->protocol  = $this->parse_protocol();
-        $this->hostname  = $this->parse_hostname();
-        $this->url       = $this->parse_url();
-        $this->method    = $this->parse_method();
-        $this->useragent = $this->parse_useragent();
+        $this->ip        = $this->getIp();
+        $this->protocol  = $this->getProtocol();
+        $this->hostname  = $this->getHostname();
+        $this->url       = $this->getUrl();
+        $this->method    = $this->getMethod();
+        $this->useragent = $this->getUseragent();
         $this->files     = $_FILES;
-        $this->input     = $this->parse_input();
+        $this->input     = $this->getInput(); // TODO: добавить обработку входящего JSON
     }
 
-    public static function i(): Http
-    {
-        if (!self::$i)
-            self::$i = new Http();
-
-        return self::$i;
-    }
-
-    private function parse_ip(): string
+    private function getIp(): string
     {
         $ip = '127.0.0.1';
         $envvars = [
@@ -61,7 +56,7 @@ class Http
         return explode(',', $ip)[0];
     }
 
-    private function parse_protocol(): string
+    private function getProtocol(): string
     {
         $protocol = 'http';
 
@@ -79,13 +74,13 @@ class Http
         return $protocol;
     }
 
-    private function parse_hostname(): string
+    private function getHostname(): string
     {
         // Говорят, что небезопасно.. но мне как-то похуй
         return rawurldecode($_SERVER['HTTP_HOST']);
     }
 
-    private function parse_url(): string
+    private function getUrl(): string
     {
         $uri = rawurldecode($_SERVER['REQUEST_URI']);
 
@@ -95,7 +90,7 @@ class Http
         return '/' . trim($uri, '/');
     }
 
-    private function parse_method(): string
+    private function getMethod(): string
     {
         $method = $_SERVER['REQUEST_METHOD'];
 
@@ -119,15 +114,15 @@ class Http
             }
         }
 
-        return str($method)->lower()->__toString();
+        return $method;
     }
 
-    private function parse_useragent(): string
+    private function getUseragent(): string
     {
-        return str($_SERVER['HTTP_USER_AGENT'])->cut(0, 255)->__toString();
+        return substr($_SERVER['HTTP_USER_AGENT'], 0, 255);
     }
 
-    private function parse_input(): object
+    private function getInput(): object
     {
         return (object) (
             ($this->method === 'POST') ? $_POST : $_GET
