@@ -10,11 +10,11 @@
             "Yeoldebasil\\Biscuit\\": "src/"
         }
     },
-    "authors": [
-        {
-            "name": "Vasiliy Okunev",
-            "email": "vokunev078@gmail.com"
-        }
-    ],
-    "require": {}
+    "authors": [{
+        "name": "Vasiliy Okunev",
+        "email": "vokunev078@gmail.com"
+    }],
+    "require": {
+        "php": "^8.4.1"
+    }
 }
