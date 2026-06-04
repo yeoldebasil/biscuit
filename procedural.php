@@ -4,11 +4,11 @@ declare (strict_types = 1);
 
 use Yeoldebasil\Biscuit\Arr;
 use Yeoldebasil\Biscuit\Err;
+use Yeoldebasil\Biscuit\Fulfill;
 use Yeoldebasil\Biscuit\Http;
 use Yeoldebasil\Biscuit\Map;
 use Yeoldebasil\Biscuit\Str;
 use Yeoldebasil\Biscuit\Util;
-use Yeoldebasil\Biscuit\Val;
 
 /**
  * Функция инициализации, проверки окружения
@@ -19,6 +19,7 @@ function kick(arr $allowed_hosts, ?string $root = '..'): void
     define('BISCUIT_VER', '0.1-dev');
 
     define('nil', null);
+    date_default_timezone_set('UTC');
 
     if (str(BISCUIT_VER)->endsWith('-dev')) {
         util::dev();
@@ -75,7 +76,7 @@ function get($pattern, $closure)
     }
 }
 
-function post($uri_pattern, $closure)
+function post($pattern, $closure)
 {
     if (http::$method != 'POST') {
         return;
@@ -86,20 +87,49 @@ function post($uri_pattern, $closure)
     }
 }
 
-function serve($closure = null, $params = [])
+function dispatch($closure = null, $params = [])
 {
     if (defined('BISCUIT_ENDS')) {
         return;
     }
 
     if (! $closure) {
-        $closure = fn() => http::respond(404, [], (string) http::$uri);
+        $closure = fn() => http::respond(404, [], 'not found');
     }
 
     call_user_func_array($closure, $params);
 }
 
-function str(string $value, string $encoding = 'UTF-8'): Str
+function fetch($url, map $params)
+{
+    $url = str($url);
+
+    if ($url->startsWith(':')) {
+        $url->value = '127.0.0.1' . $url->value;
+    }
+
+    $ctx = [
+        'http' => [
+            'method'  => $params->method,
+            'headers' => implode("\r\n", $params->headers ?? []),
+            'content' => (string) $params->body,
+            'timeout' => 1,
+        ],
+    ];
+
+    try {
+        return new Fulfill(file_get_contents($url, false, stream_context_create($ctx)));
+    } catch (\Throwable $t) {
+        return new Fulfill($t);
+    }
+}
+
+function fulfill($return): Fulfill
+{
+    return new Fulfill($return);
+}
+
+function str(string $value, string $encoding = null): Str
 {
     return new Str($value, $encoding);
 }
@@ -112,6 +142,11 @@ function arr(...$list): Arr
 function map(...$hash): Map
 {
     return new Map($hash);
+}
+
+function json(...$hash): Str
+{
+    return str(json_encode($hash, JSON_UNESCAPED_UNICODE));
 }
 
 /**

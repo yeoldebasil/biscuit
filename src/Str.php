@@ -180,7 +180,7 @@ class Str implements Stringable, Iterator, Countable
 
     public function blank(): bool
     {
-        return $this->value === null || trim($value) === '';
+        return $this->value === null || trim($this->value) === '';
     }
 
     public function present(): bool

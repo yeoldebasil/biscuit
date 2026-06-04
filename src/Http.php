@@ -12,7 +12,7 @@ use stdClass;
 class Http
 {
     public static str $ip;
-    public static object $headers;
+    public static stdClass $headers;
     public static bool $secure;
     public static str $hostname;
     public static str $uri;
@@ -93,7 +93,6 @@ class Http
 
     private static function getHeaders(): object
     {
-        // todo: replace stdclass with map
         $headers = new stdClass;
 
         foreach ($_SERVER as $name => $value) {
@@ -110,7 +109,7 @@ class Http
         return $headers;
     }
 
-    public static function getIp(): str
+    private static function getIp(): str
     {
         $ip      = str('127.0.0.1');
         $envvars = arr(
@@ -121,15 +120,17 @@ class Http
             'HTTP_FORWARDED',
         );
 
-        // foreach ($envvars as $var) {
-        //     (env::get($var)->blank())
-        //         ?: $ip = str($var);
-        // }
+        foreach ($envvars as $var) {
+            Env::get($var)->then(
+                result: fn($var) => $ip = $var,
+                error: nil
+            );
+        }
 
         return $ip->split(',')->{0};
     }
 
-    public static function isSecure(): bool
+    private static function isSecure(): bool
     {
         if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") {
             return true;
@@ -145,7 +146,7 @@ class Http
         return false;
     }
 
-    public static function getHost(): str
+    private static function getHost(): str
     {
         return str(rawurldecode(static::$headers->{'host'}));
     }
@@ -177,9 +178,9 @@ class Http
          * Если это POST запрос, то необходимо проверить наличие X-HTTP-Method-Override
          */
         elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            if (static::$headers?->{'X-HTTP-Method-Override'}
-                && in_array($headers['X-HTTP-Method-Override'], ['PUT', 'DELETE', 'PATCH'])) {
-                $method = $headers['X-HTTP-Method-Override'];
+            if (isset(static::$headers->{'x-http-method-override'})
+                && in_array(static::$headers->{'x-http-method-override'}, ['PUT', 'DELETE', 'PATCH'])) {
+                $method = static::$headers->{'x-http-method-override'};
             }
         }
 

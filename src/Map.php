@@ -15,7 +15,7 @@ class Map implements Iterator, Countable
 
     public function __construct(...$value)
     {
-        if (array_is_list($value[0])) {
+        if (array_is_list($value[0]) && $value !== [0 => []]) {
             throw new ValueError("Don't use Map for list arrays");
         }
 
@@ -79,12 +79,9 @@ class Map implements Iterator, Countable
         unset($this->value[$key]);
     }
 
-    public function add($element): void
+    public function add($key, $value): void
     {
-        assert(array_is_list($element));
-        assert(count($element) == 1);
-
-        $this->value[] = $element;
+        $this->value[] = [$key => $value];
     }
 
     public function json(): Str

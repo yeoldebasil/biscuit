@@ -4,25 +4,31 @@ declare (strict_types = 1);
 
 namespace Yeoldebasil\Biscuit;
 
+use ErrorException;
+
 class Env
 {
     /**
      * Возвращает значение одной или всех переменных окружения.
      */
-    public static function get(string | str $name): Str | false
+    public static function get(string | str $name): Fulfill
     {
-        return is_string($var = getenv($name, false))
-            ? str($var)
-            : false;
+        $var = getenv($name, false);
+
+        return is_string($var)
+            ? new Fulfill($var)
+            : new Fulfill(new ErrorException);
     }
 
     /**
      * Возвращает только локальные переменные окружения, которые установила операционная система или команда putenv
      */
-    public static function local(string | str $name): Str | false
+    public static function local(string | str $name): Fulfill
     {
-        return is_string($var = getenv($name, true))
-            ? str($var)
-            : false;
+        $var = getenv($name, true);
+
+        return is_string($var)
+            ? new Fulfill($var)
+            : new Fulfill(new ErrorException);
     }
 }
