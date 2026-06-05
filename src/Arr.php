@@ -2,11 +2,10 @@
 
 declare (strict_types = 1);
 
-namespace Yeoldebasil\Biscuit;
+namespace Biscuit;
 
 class Arr
 {
-    // necessary for countable
     public function count(): int
     {
         return count($this->value);
@@ -35,8 +34,15 @@ class Arr
         return ! $this->isList($self);
     }
 
-    public function json($self, int $flags = JSON_UNESCAPED_UNICODE): Str
+    public function each($self, $callable): void
     {
-        return json_encode($this->value, $flags);
+        foreach ($self as $key => $value) {
+            $callable($key, $value);
+        }
+    }
+
+    public function json($self, int $flags = JSON_UNESCAPED_UNICODE): string
+    {
+        return json_encode($self, $flags);
     }
 }

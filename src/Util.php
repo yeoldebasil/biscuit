@@ -23,7 +23,11 @@ class Util
         $message = $t->getMessage();
         $file    = $t->getFile();
         $line    = $t->getLine();
-        $trace   = $t->getTraceAsString()->replace('/var/www/html/', '');
+        $trace   = $t->getTraceAsString();
+
+        if (defined('BISCUIT_PATH_BEFORE_ROOT')) {
+            $trace->replace(BISCUIT_PATH_BEFORE_ROOT, '');
+        }
 
         $html  = sprintf('<h1>%s</h1>', $title);
         $html .= '<p>Приложение не смогло продолжить работу из-за следующей ошибки:</p>';
@@ -76,7 +80,9 @@ class Util
         ini_set('post_max_size', '10M');
         ini_set('display_errors', '1');
         ini_set('display_startup_errors', '1');
-        // error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
-        error_reporting(E_ALL);
+        ini_set('log_errors', 'on');
+        ini_set('error_log', getcwd() . '/runtime/logs/php-error.log');
+        error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+        //error_reporting(E_ALL);
     }
 }

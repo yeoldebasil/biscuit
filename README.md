@@ -8,15 +8,13 @@ biscuit - php-фреймворк, который:
 ## Пример использования
 
 ```php
-use Yeoldebasil\Biscuit\{
-  Http,
-  Util
-};
+use Throwable;
+use Biscuit\{Http, Util};
 
 try {
   kick(
     root: '..',
-    allowed_hosts: arr('localhost', '127.0.0.1')
+    allowed_hosts: ['localhost', '127.0.0.1']
   );
 
   http::respond(
@@ -55,9 +53,9 @@ fmt::$onlog = (function ($log) {
 
 #### Str
 
-`Str` это класс для расширенной работы со строками, создается следующим образом:
+`Str` это класс для расширенной работы со строками:
 ```php
-$str = str('Hello, world!');
+$str = 'Hello, world!';
 ```
 
 `upper`, `lower` изменяют регистр :
@@ -90,34 +88,18 @@ fmt::log($result);
 ```
 #### Arr
 
-`Arr` это класс для расширенной работы с массивами-списками, создается следующим образом:
+`Arr` это класс для расширенной работы с массивами:
 
 ```php
-$cities = arr(
+$cities = [
   'Москва',
   'Санкт-Петербург',
   'Ставрополь'
-);
+];
 
-fmt::log( "Всего: {$cities->len()}", $cities );
+fmt::log( "Всего: {$cities->count()}", $cities );
 
 ->  'Всего: 3', [Москва, Санкт-Петербург, Ставрополь]
-```
-
-#### Map
-
-`Map` это класс для расширенной работы со хеш-массивами (ключ: значение), создается следующим образом:
-
-```php
-$location = map(
-  x: 345,
-  y: -23,
-  name: 'Pin'
-);
-
-fmt::log( "X: {$location->x}" );
-
-->  'X: 345'
 ```
 
 #### Env
@@ -143,7 +125,7 @@ fmt::log( gen::uuidv4() );
 `hex` генерирует последовательность шестнадцатиричных значений в случайном порядке
 
 ```php
-fmt::log( pwd::hex(16) );
+fmt::log( gen::hex(16) );
 
 -> 'b7841a0d1b1bac09'
 ```

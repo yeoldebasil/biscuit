@@ -1,6 +1,6 @@
 {
     "name": "yeoldebasil/biscuit",
-    "description": "Fast pace web-app development library for PHP",
+    "description": "Fast pace web-app development library",
     "type": "library",
     "license": "MIT",
     "version": "0.1-dev",
@@ -20,6 +20,10 @@
         "email": "vokunev078@gmail.com"
     }],
     "require": {
-        "php": "^8.4.1"
+        "php": "^8.4.1",
+        "ext-pdo": "*",
+        "ext-mbstring": "*",
+        "ext-scalar_objects": "*",
+        "ext-yaml": "*",
     }
 }

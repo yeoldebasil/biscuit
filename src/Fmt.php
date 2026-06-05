@@ -10,7 +10,7 @@ class Fmt
 {
     public static Closure $onlog;
 
-    public static function log(...$values): str
+    public static function log(...$values): string
     {
         $result = '-> ';
         $len    = count($values);
@@ -41,7 +41,7 @@ class Fmt
             echo($result);
         }
 
-        return str($result);
+        return $result;
     }
 
     public static function html($html): string

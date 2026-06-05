@@ -6,7 +6,7 @@ namespace Biscuit;
 
 class App
 {
-    public static Closure $onerr;
+    public static $onerr;
     #public static Closure $onsuccess;
 
     public static function defaultErrHandler($severity, $message, $file, $line)

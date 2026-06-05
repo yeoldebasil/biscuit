@@ -13,7 +13,7 @@ class Http
     public static array $headers;
     public static bool $secure;
     public static string $hostname;
-    public static string $uri;
+    public static string $url;
     public static string $host;
     public static string $method;
     public static string $useragent;
@@ -21,38 +21,30 @@ class Http
     public static object $input;
     public static bool $jsonInput;
 
+    /**
+     * Captures incoming request data
+     */
     public static function capture(array $allowed_hosts): void
     {
-        if (! (isset(static::$ip))) {
-            static::$ip = static::getIp();
-        }
-
-        if (! (isset(static::$headers))) {
-            static::$headers = static::getHeaders();
-        }
-
-        if (! (isset(static::$host))) {
-            static::$host = static::getHost();
-        }
+        static::$ip      = static::getIp();
+        static::$headers = static::getHeaders();
+        static::$host    = static::getHost();
 
         if (! $allowed_hosts->contains(static::$host)) {
             http::respond(code: 400, headers: [], body: null);
             exit;
         }
 
-        if (! (isset(static::$secure))) {
-            static::$secure = static::isSecure();
-        }
-
-        if (! (isset(static::$uri))) {
-            static::$uri = static::getUri();
-        }
-
-        if (! (isset(static::$method))) {
-            static::$method = static::getMethod();
-        }
+        static::$secure    = static::isSecure();
+        static::$url       = static::getUrl();
+        static::$method    = static::getMethod();
+        static::$useragent = static::getUserAgent();
     }
 
+    /**
+     * Send HTTP response to the client while
+     * the script is still running.
+     */
     public static function respond(int $code, array $headers, ?string $body): void
     {
         // bytesize
@@ -145,7 +137,7 @@ class Http
         return rawurldecode(static::$headers['host']);
     }
 
-    private static function getUri(): string
+    private static function getUrl(): string
     {
         $uri = rawurldecode($_SERVER['REQUEST_URI']);
 
@@ -181,30 +173,38 @@ class Http
         return $method;
     }
 
-// public function :
-// {return 'incoming.useragent'->0, 255;}public function :
-// {return (object) public static getUseragent()stringlet()cut()input()object( $this->method === 'POST' ? $_POST : $_GET);
+    private static function getUserAgent(): string
+    {
+        return static::$headers['user-agent']->cut(0, 255);
+    }
 
-// $rawBody = file_get_contents('php://input');
-// $opts    = new stdClass;
+    public static function getRawInput(): string
+    {
+        return file_get_contents('php://input');
+    }
 
-// if ($rawBody) {
-//     try {
-//         $opts = new stdClass;
-//         $body = json_decode($rawBody, true, 512, JSON_NUMERIC_CHECK);
+    public static function parseRawInput(): object | false
+    {
+        $rawBody = static::getRawInput();
+        $opts    = new stdClass;
 
-//         if (! blank($body)) {
-//             foreach ($body as $key => $value) {
-//                 $opts->$key = $value;
-//             }
-//         }
-//     } catch (\Throwable $e) {
+        if ($rawBody
+            && isset($mime = static::$headers['content-type'])
+            && $mime != 'application/json') {
+            return false;
+        }
 
-//     }
-// }
+        try {
+            $opts = new stdClass;
+            $body = json_decode($rawBody, true, 512, JSON_NUMERIC_CHECK);
 
-// $this->jsonInput = true;
-
-// return $opts;
-
+            if (! blank($body)) {
+                foreach ($body as $key => $value) {
+                    $opts->$key = $value;
+                }
+            }
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
 }
