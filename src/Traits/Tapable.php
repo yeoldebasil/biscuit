@@ -2,7 +2,7 @@
 
 declare (strict_types = 1);
 
-namespace Yeoldebasil\Biscuit\Traits;
+namespace Biscuit\Traits;
 
 trait Tapable
 {

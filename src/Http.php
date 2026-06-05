@@ -2,28 +2,26 @@
 
 declare (strict_types = 1);
 
-namespace Yeoldebasil\Biscuit;
-
-use stdClass;
+namespace Biscuit;
 
 /**
  * Входящий HTTP-запрос
  */
 class Http
 {
-    public static str $ip;
-    public static stdClass $headers;
+    public static string $ip;
+    public static array $headers;
     public static bool $secure;
-    public static str $hostname;
-    public static str $uri;
-    public static str $host;
-    public static str $method;
-    public static str $useragent;
+    public static string $hostname;
+    public static string $uri;
+    public static string $host;
+    public static string $method;
+    public static string $useragent;
     public static array $files;
     public static object $input;
     public static bool $jsonInput;
 
-    public static function capture(arr $allowed_hosts): void
+    public static function capture(array $allowed_hosts): void
     {
         if (! (isset(static::$ip))) {
             static::$ip = static::getIp();
@@ -55,14 +53,10 @@ class Http
         }
     }
 
-    public static function respond(int $code, array | arr $headers, str | string | null $body): void
+    public static function respond(int $code, array $headers, ?string $body): void
     {
-        if (is_string($body)) {
-            $body = str($body);
-        }
-
         // bytesize
-        $len = $body == nil ? 0 : $body->encoding('8bit')->len();
+        $len = $body === null ? 0 : $body->bytesize();
 
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_write_close();
@@ -70,7 +64,7 @@ class Http
 
         http_response_code($code);
 
-        header("X-Powered-By: Biscuit/" . BISCUIT_VER);
+        header("X-Powered-By: Biscuit/" . \BISCUIT_VER);
         // header("Content-Encoding: none");
         header("Content-Length: {$len}");
         header("Connection: close");
@@ -91,43 +85,43 @@ class Http
         define('BISCUIT_ENDS', microtime(true));
     }
 
-    private static function getHeaders(): object
+    private static function getHeaders(): array
     {
-        $headers = new stdClass;
+        $headers = [];
 
         foreach ($_SERVER as $name => $value) {
-            if (($name = str($name))->startsWith('HTTP_')) {
+            if ($name->startsWith('HTTP_')) {
                 $name = $name
                     ->cut(5, null)
                     ->replace('_', '-')
                     ->lower(); # http2
 
-                $headers->{$name} = $value;
+                $headers[$name] = $value;
             }
         }
 
         return $headers;
     }
 
-    private static function getIp(): str
+    private static function getIp(): string
     {
-        $ip      = str('127.0.0.1');
-        $envvars = arr(
+        $ip      = '127.0.0.1';
+        $envvars = [
             'REMOTE_ADDR',
             'HTTP_CLIENT_IP',
             'HTTP_X_FORWARDED_FOR',
             'HTTP_X_FORWARDED',
             'HTTP_FORWARDED',
-        );
+        ];
 
-        foreach ($envvars as $var) {
-            Env::get($var)->then(
-                result: fn($var) => $ip = $var,
-                error: nil
-            );
-        }
+        // foreach ($envvars as $var) {
+        //     Env::get($var)->then(
+        //         result: fn($var) => $ip = $var,
+        //         error: nil
+        //     );
+        // }
 
-        return $ip->split(',')->{0};
+        return $ip->split(',')[0];
     }
 
     private static function isSecure(): bool
@@ -146,12 +140,12 @@ class Http
         return false;
     }
 
-    private static function getHost(): str
+    private static function getHost(): string
     {
-        return str(rawurldecode(static::$headers->{'host'}));
+        return rawurldecode(static::$headers['host']);
     }
 
-    private static function getUri(): str
+    private static function getUri(): string
     {
         $uri = rawurldecode($_SERVER['REQUEST_URI']);
 
@@ -159,10 +153,10 @@ class Http
             $uri = substr($uri, 0, strpos($uri, '?'));
         }
 
-        return str('/' . trim($uri, '/'), 'ascii');
+        return '/' . trim($uri, '/');
     }
 
-    private static function getMethod(): str
+    private static function getMethod(): string
     {
         $method = $_SERVER['REQUEST_METHOD'];
 
@@ -178,13 +172,13 @@ class Http
          * Если это POST запрос, то необходимо проверить наличие X-HTTP-Method-Override
          */
         elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            if (isset(static::$headers->{'x-http-method-override'})
-                && in_array(static::$headers->{'x-http-method-override'}, ['PUT', 'DELETE', 'PATCH'])) {
-                $method = static::$headers->{'x-http-method-override'};
+            if (isset(static::$headers['x-http-method-override'])
+                && in_array(static::$headers['x-http-method-override'], ['PUT', 'DELETE', 'PATCH'])) {
+                $method = static::$headers['x-http-method-override'];
             }
         }
 
-        return str($method);
+        return $method;
     }
 
 // public function :

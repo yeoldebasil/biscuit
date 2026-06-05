@@ -4,87 +4,12 @@ declare (strict_types = 1);
 
 namespace Yeoldebasil\Biscuit;
 
-use Countable;
-use Iterator;
-use ValueError;
-
-class Arr implements Iterator, Countable
+class Arr
 {
-    private array $value = [];
-
-    public function __construct(...$value)
-    {
-        if ($value != []) {
-            $value = $value[0];
-        }
-
-        if (! array_is_list($value)) {
-            throw new ValueError("Don't use Arr for hash arrays, instead use Map");
-        }
-
-        $this->value = $value;
-    }
-
     // necessary for countable
     public function count(): int
     {
         return count($this->value);
-    }
-
-    // necessary for iterator
-    public function rewind(): void
-    {
-        $this->index = 0;
-    }
-
-    public function current(): mixed
-    {
-        return $this->value[$this->index];
-    }
-
-    public function key(): mixed
-    {
-        return $this->value[$this->index];
-    }
-
-    public function next(): void
-    {
-        ++$this->index;
-    }
-
-    public function valid(): bool
-    {
-        return isset($this->value[$this->index]);
-    }
-
-    // necessary for property access
-    public function &__get($key)
-    {
-        return $this->value[$key];
-    }
-
-    public function __set($key, $value)
-    {
-        if (is_string($value)) {
-            $this->value[$key] = str($value);
-        }
-
-        $this->value[$key] = $value;
-    }
-
-    public function __isset($key)
-    {
-        return isset($this->value[$key]);
-    }
-
-    public function __unset($key)
-    {
-        unset($this->value[$key]);
-    }
-
-    public function add($element): void
-    {
-        $this->value[] = $element;
     }
 
     /**
@@ -95,9 +20,23 @@ class Arr implements Iterator, Countable
         return count($this->value);
     }
 
-    public function contains($element): bool
+    public function contains($self, $element): bool
     {
-        // in_array медленнее isset
-        return in_array($element, $this->value);
+        return in_array($element, $self);
+    }
+
+    public function isList($self): bool
+    {
+        return array_is_list($self);
+    }
+
+    public function isMap($self): bool
+    {
+        return ! $this->isList($self);
+    }
+
+    public function json($self, int $flags = JSON_UNESCAPED_UNICODE): Str
+    {
+        return json_encode($this->value, $flags);
     }
 }

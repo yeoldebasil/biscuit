@@ -33,6 +33,7 @@ try {
 
 ## Установка
 - для корректной работы требуется php 8.4.1^, nginx и fastcgi, composer
+- скомпилировать и включить расширение [scalar_objects](https://github.com/nikic/scalar_objects)
 - `composer init`, затем нужно добавить в composer.json:
 ```json
 "repositories": [{"type": "vcs", "url": "https://github.com/yeoldebasil/biscuit"}]

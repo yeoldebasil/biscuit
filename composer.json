@@ -5,9 +5,14 @@
     "license": "MIT",
     "version": "0.1-dev",
     "autoload": {
-        "files": ["procedural.php"],
+        "files": [
+            "src/Procedural/constants.php",
+            "src/Procedural/init.php",
+            "src/Procedural/logic.php",
+            "src/Procedural/routing.php"
+        ],
         "psr-4": {
-            "Yeoldebasil\\Biscuit\\": "src/"
+            "Biscuit\\": "src/"
         }
     },
     "authors": [{

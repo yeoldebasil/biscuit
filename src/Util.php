@@ -2,10 +2,10 @@
 
 declare (strict_types = 1);
 
-namespace Yeoldebasil\Biscuit;
+namespace Biscuit;
 
+use Biscuit\Http as http;
 use Throwable;
-use Yeoldebasil\Biscuit\Http;
 
 class Util
 {
@@ -23,7 +23,7 @@ class Util
         $message = $t->getMessage();
         $file    = $t->getFile();
         $line    = $t->getLine();
-        $trace   = str($t->getTraceAsString())->replace('/var/www/html/', '');
+        $trace   = $t->getTraceAsString()->replace('/var/www/html/', '');
 
         $html  = sprintf('<h1>%s</h1>', $title);
         $html .= '<p>Приложение не смогло продолжить работу из-за следующей ошибки:</p>';
@@ -76,6 +76,7 @@ class Util
         ini_set('post_max_size', '10M');
         ini_set('display_errors', '1');
         ini_set('display_startup_errors', '1');
-        error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
+        // error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
+        error_reporting(E_ALL);
     }
 }

@@ -2,7 +2,7 @@
 
 declare (strict_types = 1);
 
-namespace Yeoldebasil\Biscuit;
+namespace Biscuit;
 
 class Gen
 {
@@ -19,24 +19,21 @@ class Gen
     /**
      * Возвращает 36-символьный UUID ❄️.
      */
-    public static function uuidv4(): Str
+    public static function uuidv4(): string
     {
         $data    = random_bytes(16);
         $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
         $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
 
-        return str(vsprintf(
-            '%s%s-%s-%s-%s-%s%s%s',
-            str_split(bin2hex($data), 4)
-        ));
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
-    public static function bcrypt(str | string $raw, int $strength): str
+    public static function bcrypt(string $raw, int $strength): string
     {
         //...
     }
 
-    public static function sha256(str | string $raw): str
+    public static function sha256(string $raw): str
     {
         //...
     }
@@ -70,36 +67,36 @@ class Gen
             }
         }
 
-        public static function hex(int $length): str
+        public static function hex(int $length): string
     {
-            return str(bin2hex(random_bytes($length / 2)));
+            return bin2hex(random_bytes($length / 2));
         }
 
         /**
          * Генерация случайного значения в формате
          * Англ. алфавит, цифры, нижнее подчеркивание (A-z0-9_)
          */
-        public static function alnumu(int $length): Str
+        public static function alnumu(int $length): string
     {
             return self::dict(self::DICTIONARY_ALNUM . '_', $length);
         }
 
-        public static function alnum(int $length): Str
+        public static function alnum(int $length): string
     {
             return self::dict(self::DICTIONARY_ALNUM, $length);
         }
 
-        public static function base58(int $length): Str
+        public static function base58(int $length): string
     {
             return self::dict(self::DICTIONARY_BASE58, $length);
         }
 
-        public static function base62(int $length): Str
+        public static function base62(int $length): string
     {
             return self::dict(self::DICTIONARY_BASE62, $length);
         }
 
-        public static function base64(int $length): Str
+        public static function base64(int $length): string
     {
             return self::dict(self::DICTIONARY_BASE64, $length);
         }
@@ -107,7 +104,7 @@ class Gen
         /**
          * Генерация случайного значения с указанием словаря
          */
-        private static function dict(string $dictionary, int $length): Str
+        private static function dict(string $dictionary, int $length): string
     {
             $size = strlen($dictionary);
             $key  = '';

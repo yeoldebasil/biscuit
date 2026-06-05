@@ -2,210 +2,151 @@
 
 declare (strict_types = 1);
 
-namespace Yeoldebasil\Biscuit;
+namespace Biscuit;
 
-use Countable;
-use InvalidArgumentException;
-use Iterator;
 use RuntimeException;
-use Stringable;
 
-class Str implements Stringable, Iterator, Countable
+/**
+ * Unicode safe (kinda) string operations class
+ */
+class Str
 {
-    protected int $index = 0;
-
-    final public function __construct(
-        public string $value,
-        protected ?string $encoding = null
-    ) {
-        if (! mb_check_encoding('', $encoding)) {
-            throw new InvalidArgumentException(
-                sprintf('Unsupported encoding "%s"', $encoding)
-            );
-        }
-    }
-
-    public function rewind(): void
+    public function is($self, $comparing_to): bool
     {
-        $this->index = 0;
+        return $self === $comparing_to;
     }
 
-    public function current(): int
+    public function upper($self): string
     {
-        return mb_substr($this->value, $this->index, null, $this->encoding);
+        $result = mb_strtoupper($self, BISCUIT_ENCODING);
+        //$this->assertMbstringResult($result, 'mb_strtoupper');
+
+        return $result;
     }
 
-    public function key(): int
+    public function lower($self): string
     {
-        return $this->index;
+        $result = mb_strtolower($self, BISCUIT_ENCODING);
+        //$this->assertMbstringResult($result, 'mb_strtoupper');
+
+        return $result;
     }
 
-    public function next(): void
+    public function capitalize($self): string
     {
-        ++$this->index;
+        $result = mb_ucfirst($self, BISCUIT_ENCODING);
+        //$this->assertMbstringResult($result, 'mb_ucfirst');
+
+        return $result;
     }
 
-    public function valid(): bool
-    {
-        return mb_str_split($this->value, 1, $this->encoding)[$this->index];
-    }
-
-    public function upper(): static
-    {
-        $result = mb_strtoupper($this->value, $this->encoding);
-        $this->assertMbstringResult($result, 'mb_strtoupper');
-
-        return new static($result, $this->encoding);
-    }
-
-    public function lower(): static
-    {
-        $result = mb_strtolower($this->value, $this->encoding);
-        $this->assertMbstringResult($result, 'mb_strtoupper');
-
-        return new static($result, $this->encoding);
-    }
-
-    public function capitalize(): static
-    {
-        $result = mb_ucfirst($this->value, $this->encoding);
-        $this->assertMbstringResult($result, 'mb_ucfirst');
-
-        return new static($result, $this->encoding);
-    }
-
-    public function capitalizeEachWord(): static
+    public function capitalizeEachWord($self): string
     {
         $result = '';
-        mb_regex_encoding($this->encoding);
-        mb_ereg_search_init($this->value, '(\S)(\S*\s*)|(\s+)');
+        mb_regex_encoding(BISCUIT_ENCODING);
+        mb_ereg_search_init($self, '(\S)(\S*\s*)|(\s+)');
 
         while ($match = mb_ereg_search_regs()) {
             $result .= $match[3]
                 ? $match[3]
-                : str($match[1])->upper() . $match[2];
+                : $match[1]->upper() . $match[2];
         }
 
-        $this->assertMbstringResult(
-            $result,
-            'mb_ereg_search_regs'
-        );
+        //$this->assertMbstringResult($result,'mb_ereg_search_regs');
 
-        return new static($result, $this->encoding);
+        return $result;
     }
 
     /**
      * Удаляет пробелы (или другие символы) из начала и конца строки,
      * также в середине строки превращает множество пробелов в один.
      */
-    public function strip(): static
+    public function strip($self): string
     {
-        $result = preg_replace('/\s+/', ' ', $this->value);
+        $result = preg_replace('/\s+/', ' ', $self);
         $result = trim($result);
-
-        return new static($result);
-    }
-
-    public function cut(int $offset, ?int $length = null): static
-    {
-        $result = mb_substr($this->value, $offset, $length, $this->encoding);
-        $this->assertMbstringResult($result, 'mb_substr');
-
-        return new static($result, $this->encoding);
-    }
-
-    public function split(string | str $delimiter): Arr
-    {
-        $result = new Arr;
-        $split  = explode($delimiter, $this->value);
-
-        foreach ($split as $element) {
-            $result->add(str($element, $this->encoding));
-        }
 
         return $result;
     }
 
-    public function replace($search, $replace): static
+    public function cut($self, int $offset, ?int $length = null): string
     {
-        $result = str_replace($search, $replace, $this->value);
-        return new static($result, $this->encoding);
+        $result = mb_substr($self, $offset, $length, BISCUIT_ENCODING);
+        //$this->assertMbstringResult($result, 'mb_substr');
+
+        return $result;
     }
 
-    public function encoding(string | str | null $encoding): static
+    public function split($self, string $delimiter): array
     {
-        if (! mb_check_encoding('', $encoding)) {
-            throw new InvalidArgumentException(
-                sprintf('Unsupported encoding "%s"', $encoding)
-            );
-        }
-
-        $this->encoding = $encoding;
-        return $this;
+        return explode($delimiter, $self);
     }
 
-    /**
-     * Требуется для Countable
-     */
-    public function count(): int
+    public function replace($self, $search, $replace): string
     {
-        return $this->len();
+        return str_replace($search, $replace, $self);
     }
 
-    public function len(): int
+    public function len($self): int
     {
-        return mb_strlen($this->value, $this->encoding);
+        $result = mb_strlen($self, BISCUIT_ENCODING);
+        //$this->assertMbstringResult($result, 'mb_strlen');
+
+        return $result;
     }
 
-    public function contains(string $substring): bool
+    public function bytesize($self): int
     {
-        if ($this->value === '') {
+        $result = mb_strlen($self, '8bit');
+        //$this->assertMbstringResult($result, 'mb_strlen');
+
+        return $result;
+    }
+
+    public function contains($self, $selfubstring): bool
+    {
+        if ($self === '') {
             return false;
         }
 
-        return mb_substr_count($this->value, $substring, $this->encoding) > 0;
+        return mb_substr_count($self, $substring, BISCUIT_ENCODING) > 0;
     }
 
-    public function startsWith(string $prefix): bool
+    public function startsWith($self, string $prefix): bool
     {
-        $prefix_len = mb_strlen($prefix, $this->encoding);
-        return mb_substr($this->value, 0, $prefix_len, $this->encoding) === $prefix;
+        $prefix_len = mb_strlen($prefix, BISCUIT_ENCODING);
+        return mb_substr($self, 0, $prefix_len, BISCUIT_ENCODING) === $prefix;
     }
 
-    public function endsWith(string $suffix): bool
+    public function endsWith($self, $suffix): bool
     {
-        $suffix_len = mb_strlen($suffix, $this->encoding);
-        return mb_substr($this->value, -$suffix_len, null, $this->encoding) === $suffix;
+        $suffix_len = mb_strlen($suffix, BISCUIT_ENCODING);
+        return mb_substr($self, -$suffix_len, null, BISCUIT_ENCODING) === $suffix;
     }
 
-    public function blank(): bool
+    public function blank($self): bool
     {
-        return $this->value === null || trim($this->value) === '';
+        return $self === null || trim($self) === '';
     }
 
-    public function present(): bool
+    public function present($self): bool
     {
-        return ! $this->blank();
+        return ! $this->blank($self);
     }
 
-    public function isNumeric(): bool
+    public function isNumeric($self): bool
     {
-        return is_numeric($this->value);
+        return is_numeric($self);
     }
 
-    public function __toString(): string
-    {
-        return $this->value;
-    }
-
-    /**
-     * Проверяет, что вызов mbstring-функции не вернул false (ошибку).
-     *
-     * @param mixed  $result   Результат mbstring-функции.
-     * @param string $function Имя метода.
-     *
-     * @throws RuntimeException
-     */
+/**
+ * Проверяет, что вызов mbstring-функции не вернул false (ошибку).
+ *
+ * @param mixed  $result   Результат mbstring-функции.
+ * @param string $function Имя метода.
+ *
+ * @throws RuntimeException
+ */
     private function assertMbstringResult(mixed $result, string $function): void
     {
         if ($result === false) {
@@ -213,7 +154,7 @@ class Str implements Stringable, Iterator, Countable
                 sprintf(
                     'Error calling %s with "%s" encoding.',
                     $function,
-                    $this->encoding
+                    BISCUIT_ENCODING
                 )
             );
         }
